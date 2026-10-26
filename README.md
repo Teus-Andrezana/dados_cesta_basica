@@ -14,7 +14,7 @@ O objetivo é responder perguntas práticas para quem faz compras: **como o pre�
 | # | Pergunta | Abordagem |
 |---|----------|-----------|
 | 1 | **Café e suas variabilidades**: o que explica a variação do preço do café (tempo, marca ou mercado)? Dá para prever o próximo mês? | Decomposição da série, dispersão entre mercados, ETS contra um baseline ingênuo, validação temporal |
-| 2 | **Mercados de melhores preços**: em qual mercado vale mais a pena comprar cada produto? | Preço relativo à mediana do mês, agrupamento por tipos de mercado (caro, médio, barato), controle por marca, ranking com intervalo de confiança |
+| 2 | **Mercados de melhores preços**: em qual mercado vale mais a pena comprar cada produto? | Preço relativo à mediana do mês, agrupamento por tipos de mercado (caro, médio, barato), ranking com intervalo de confiança |
 
 A descrição completa de cada pergunta (objetivo, método, conclusão e discussão) fica em [`docs/perguntas.md`](docs/perguntas.md).
 
@@ -72,8 +72,8 @@ jupyter notebook notebooks/cesta_basica.ipynb
 - [x] Remoção de mercados com pouco histórico (menos de 28 meses)
 - [x] Padronização das marcas de café
 - [x] Exploração do preço do café por marca
-- [ ] Unificação dos nomes de produto que mudaram em mar/2026
-- [ ] Remoção de duplicatas e outliers
+- [x] Unificação dos nomes de produto
+- [x] Remoção de duplicatas e outliers
 - [ ] Pergunta 1: variabilidade e previsão do preço do café
 - [ ] Pergunta 2: ranking de mercados por produto
 

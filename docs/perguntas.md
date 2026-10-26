@@ -78,8 +78,6 @@ Identificar os mercados com preços sistematicamente mais baixos, por produto e 
 
 **Próximos passos:**
 
-- usar a proporção de observações do mercado no grupo barato, e não a contagem absoluta, para não favorecer mercados com mais registros;
-- controlar por marca (comparar o mesmo produto da mesma marca entre mercados);
 - calcular um intervalo de confiança do ranking (bootstrap das observações).
 
 ### Conclusão
