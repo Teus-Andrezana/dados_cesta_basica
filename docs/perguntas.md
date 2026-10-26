@@ -19,37 +19,32 @@ Todas as análises estão em [`notebooks/cesta_basica.ipynb`](../notebooks/cesta
 
 ### Questão
 
-O que explica a variação do preço do café: o tempo (tendência e sazonalidade), a marca ou o mercado? É possível prever o preço médio do próximo mês?
+Como o preço do café evoluiu ao longo do período (tendência e sazonalidade)? É possível prever o preço médio do próximo mês?
 
 ### Objetivo e motivação
 
-O café teve forte alta de preço no período, e é um dos itens com mais marcas diferentes na cesta. Queremos entender:
+O café teve forte alta de preço no período, e é um dos itens com mais marcas diferentes na cesta. Queremos entender o movimento do preço ao longo do tempo e verificar se o histórico permite antecipar o preço do mês seguinte.
 
-- quanto da variação vem do movimento geral do preço ao longo do tempo;
-- quanto vem da escolha da marca;
-- quanto vem da escolha do mercado.
-
-Isso tem uma aplicação direta para o consumidor: mostra se trocar de marca ou de mercado economiza mais do que esperar o preço mudar. A previsão do próximo mês ajuda a antecipar compras.
+Isso tem uma aplicação direta para o consumidor: a previsão do próximo mês ajuda a decidir se vale antecipar ou adiar a compra.
 
 ### Método
 
-1. **Exploração:** série do `PPK` médio mensal por marca (gráfico em painéis, com cada marca em destaque contra as demais).
+1. **Exploração:** série do `PPK` médio mensal por marca (gráfico em painéis, com cada marca em destaque contra as demais), para contextualizar as diferenças entre marcas.
 2. **Decomposição da série:** separação do preço médio mensal em tendência, sazonalidade e resíduo (`seasonal_decompose` / STL).
-3. **Fontes de variação:** comparação da dispersão do `PPK` entre marcas e entre mercados dentro de cada mês. Por exemplo, a parcela da variância explicada por marca e por mercado, via ANOVA ou regressão `PPK ~ mês + marca + mercado`.
-4. **Previsão:**
+3. **Previsão:**
    - **Modelo:** suavização exponencial (ETS / Holt), comparada com um baseline ingênuo (o preço do próximo mês é igual ao do mês atual).
    - **Validação:** temporal, com janela expansível (treino com os meses até *t*, previsão de *t+1*), nunca embaralhando os meses.
-   - **Métricas:** MAE e MAPE. O modelo só é considerado útil se superar o baseline ingênuo.
+   - **Métrica:** RMSE (raiz do erro quadrático médio, em R$/500g, a mesma unidade da série do notebook). O modelo só é considerado útil se superar o baseline ingênuo.
 
 ### Conclusão
 
-> *A preencher após a modelagem.* Responder: qual fator explica mais a variação (tempo, marca ou mercado)? O ETS superou o baseline ingênuo? Com qual erro (MAE/MAPE)?
+> *A preencher após a modelagem.* Responder: como foi a tendência do preço no período? Há sazonalidade visível? O ETS superou o baseline ingênuo? Com qual erro (RMSE)?
 
 ### Discussão
 
 - Com 48 meses de série, há no máximo 4 ciclos anuais, o que limita a estimativa de sazonalidade.
 - A alta do café no período foi puxada por fatores externos (clima, câmbio, mercado internacional), que não estão nos dados. Isso limita qualquer previsão feita só com o histórico de preços.
-- Nem toda marca aparece em todo mercado e em todo mês, então as médias por marca podem refletir a composição da amostra.
+- Nem toda marca aparece em todo mercado e em todo mês, então a média mensal pode refletir a composição da amostra, e não só a variação de preço.
 
 ---
 

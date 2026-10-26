@@ -13,7 +13,7 @@ O objetivo é responder perguntas práticas para quem faz compras: **como o pre�
 
 | # | Pergunta | Abordagem |
 |---|----------|-----------|
-| 1 | **Café e suas variabilidades**: o que explica a variação do preço do café (tempo, marca ou mercado)? Dá para prever o próximo mês? | Decomposição da série, dispersão entre mercados, ETS contra um baseline ingênuo, validação temporal |
+| 1 | **Café e suas variabilidades**: como o preço do café evoluiu ao longo do tempo? Dá para prever o próximo mês? | Decomposição da série, ETS contra um baseline ingênuo, validação temporal |
 | 2 | **Mercados de melhores preços**: em qual mercado vale mais a pena comprar cada produto? | Preço relativo à mediana do mês, agrupamento por tipos de mercado (caro, médio, barato), ranking com intervalo de confiança |
 
 A descrição completa de cada pergunta (objetivo, método, conclusão e discussão) fica em [`docs/perguntas.md`](docs/perguntas.md).
