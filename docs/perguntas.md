@@ -74,14 +74,25 @@ Identificar os mercados com preços sistematicamente mais baixos, por produto e 
 4. **Consistência entre anos:** quantas vezes cada mercado foi o primeiro do ranking em cada ano.
 5. **Filtro genérico:** repetição da análise agrupando variações do mesmo item (ex.: cortes de carne → `Carne`, `Frango Sobrecoxa` → `Frango`).
 
-**Avaliação e próximos passos:**
+**Avaliação do agrupamento:** silhueta média de cada grupo (barato, normal e caro), calculada ponto a ponto (`silhouette_samples`) em cada agrupamento de produto e ano e depois resumida pela média. Mostra se cada faixa usada no ranking é bem definida.
 
-- verificar se os três grupos estão bem separados (coeficiente de silhueta), para mostrar que a divisão escolhida pela interpretação também se sustenta nos dados;
+**Próximos passos:**
+
 - usar a proporção de observações do mercado no grupo barato, e não a contagem absoluta, para não favorecer mercados com mais registros;
 - controlar por marca (comparar o mesmo produto da mesma marca entre mercados);
 - calcular um intervalo de confiança do ranking (bootstrap das observações).
 
 ### Conclusão
+
+**Qualidade dos grupos:** a silhueta média foi parecida nos três grupos:
+
+| Grupo | Silhueta média |
+|---|---|
+| Barato | 0,57 |
+| Normal | 0,56 |
+| Caro | 0,51 |
+
+Valores acima de 0,5 costumam ser lidos como uma estrutura razoável. Ou seja, a divisão em três faixas, escolhida pela interpretação, também se sustenta nos dados. O grupo caro é um pouco menos definido, provavelmente porque os preços altos ficam mais espalhados (uma "cauda" de preços acima da mediana). Por isso, os resultados sobre mercados caros merecem um pouco mais de cautela do que os sobre mercados baratos.
 
 > *Parcial.* Em 2026, o SUP_04 e o SUP_01 empataram como mercados de menor preço, com 7 produtos cada, mas em itens diferentes:
 >
