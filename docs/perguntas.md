@@ -30,20 +30,28 @@ Isso tem uma aplicação direta para o consumidor: a previsão do próximo mês 
 ### Método
 
 1. **Exploração:** série do `PPK` médio mensal por marca (gráfico em painéis, com cada marca em destaque contra as demais), para contextualizar as diferenças entre marcas.
-2. **Decomposição da série:** separação do preço médio mensal em tendência, sazonalidade e resíduo (`seasonal_decompose` / STL).
+2. **Análise da série:** antes de escolher o modelo, verificamos se a série tem tendência, sazonalidade e se é estacionária.
+   - **Autocorrelação:** gráficos ACF e PACF (`plot_acf` / `plot_pacf`).
+   - **Decomposição STL:** separação do preço médio mensal em tendência, sazonalidade e resíduo (`STL`, com período de 12 meses).
+   - **Estacionariedade:** teste ADF (`adfuller`).
 3. **Previsão:**
-   - **Modelo:** suavização exponencial (ETS / Holt), comparada com um baseline ingênuo (o preço do próximo mês é igual ao do mês atual).
-   - **Validação:** temporal, com janela expansível (treino com os meses até *t*, previsão de *t+1*), nunca embaralhando os meses.
+   - **Modelo:** suavização exponencial de Holt com tendência amortecida, implementada com o `ETSModel(trend="add", damped_trend=True)`, comparada com um baseline ingênuo (`shift(1)`: o preço do próximo mês é igual ao do mês atual).
+   - **Validação:** validação cruzada respeitando a ordem do tempo, com janela expansível: cada fold treina com os meses até *t* e prevê *t+1*. O menor treino tem 24 meses, o que dá 24 folds (set/2024 a ago/2026). Não usamos o KFold porque ele treinaria com meses do futuro para prever o passado.
    - **Métrica:** RMSE (raiz do erro quadrático médio, em R$/500g, a mesma unidade da série do notebook). O modelo só é considerado útil se superar o baseline ingênuo.
 
 ### Conclusão
 
-> *A preencher após a modelagem.* Responder: como foi a tendência do preço no período? Há sazonalidade visível? O ETS superou o baseline ingênuo? Com qual erro (RMSE)?
+- **Tendência:** forte. O preço ficou estável em torno de R$ 19 a R$ 20 (500g) até meados de 2024, subiu até cerca de R$ 35 em meados de 2025 e depois passou a cair devagar, chegando perto de R$ 30 em 2026.
+- **Sazonalidade:** não encontrada. A ACF não tem pico no lag 12, e no STL a sazonalidade oscila só entre −R$ 1 e +R$ 1, sem repetir o mesmo desenho todo ano.
+- **Estacionariedade:** a série não é estacionária (estatística ADF de −1,28, maior que todos os valores críticos; p-value de 0,64). Por isso a suavização exponencial simples não se aplica, e o modelo indicado é o de Holt.
+- **Previsão:** na validação cruzada, o ETS teve RMSE de **R$ 1,06**, contra **R$ 1,37** do baseline ingênuo, e errou menos em 17 dos 24 meses. Ou seja, é possível prever o preço do próximo mês com um erro de cerca de R$ 1.
+- A previsão para os próximos 12 meses aponta uma queda leve, até cerca de R$ 27 em agosto de 2027, mas ela não foi validada e serve só como ilustração.
 
 ### Discussão
 
 - Com 48 meses de série, há no máximo 4 ciclos anuais, o que limita a estimativa de sazonalidade.
-- A alta do café no período foi puxada por fatores externos (clima, câmbio, mercado internacional), que não estão nos dados. Isso limita qualquer previsão feita só com o histórico de preços.
+- A alta do café no período foi puxada por fatores externos (clima, câmbio, mercado internacional), que não estão nos dados. Os dados da Conab sugerem uma relação entre o tamanho da safra e o preço, mas são só 6 pontos anuais (2026 e 2027 ainda são estimativas). Isso limita qualquer previsão feita só com o histórico de preços.
+- A vantagem do ETS vem da fase de alta (set/2024 a jun/2025). No período recente, com o preço caindo devagar, ele empata com o baseline ingênuo: quando o preço muda pouco, repetir o último valor já é uma boa previsão.
 - Nem toda marca aparece em todo mercado e em todo mês, então a média mensal pode refletir a composição da amostra, e não só a variação de preço.
 
 ---
@@ -69,31 +77,33 @@ Identificar os mercados com preços sistematicamente mais baixos, por produto e 
 4. **Consistência entre anos:** quantas vezes cada mercado foi o primeiro do ranking em cada ano.
 5. **Filtro genérico:** repetição da análise agrupando variações do mesmo item (ex.: cortes de carne → `Carne`, `Frango Sobrecoxa` → `Frango`).
 
-**Avaliação do agrupamento:** silhueta média de cada grupo (barato, normal e caro), calculada ponto a ponto (`silhouette_samples`) em cada agrupamento de produto e ano e depois resumida pela média. Mostra se cada faixa usada no ranking é bem definida.
-
-**Próximos passos:**
-
-- calcular um intervalo de confiança do ranking (bootstrap das observações).
+**Validação do ranking:** correlação de Pearson (`pearsonr`), como na autocorrelação da Aula 6 de Séries Temporais, entre o nível de preço de cada mercado em um ano e no ano seguinte. O nível de preço é a mediana do `PPK_Relativo` de cada produto dentro do mercado e, depois, a mediana entre os produtos, para que produtos com mais marcas não pesem mais. Se a correlação for alta e significativa (p ≤ 0,05), um mercado barato continua barato no ano seguinte, ou seja, o resultado não é sorte da amostra.
 
 ### Conclusão
 
-**Qualidade dos grupos:** a silhueta média foi parecida nos três grupos:
+**Validação:** em todos os pares de anos a correlação foi alta e significativa:
 
-| Grupo | Silhueta média |
-|---|---|
-| Barato | 0,57 |
-| Normal | 0,56 |
-| Caro | 0,51 |
+| Anos | r | p-valor |
+|---|---|---|
+| 2022 → 2023 | 0,89 | < 0,05 |
+| 2023 → 2024 | 0,94 | < 0,05 |
+| 2024 → 2025 | 0,92 | < 0,05 |
+| 2025 → 2026 | 0,94 | < 0,05 |
 
-Valores acima de 0,5 costumam ser lidos como uma estrutura razoável. Ou seja, a divisão em três faixas, escolhida pela interpretação, também se sustenta nos dados. O grupo caro é um pouco menos definido, provavelmente porque os preços altos ficam mais espalhados (uma "cauda" de preços acima da mediana). Por isso, os resultados sobre mercados caros merecem um pouco mais de cautela do que os sobre mercados baratos.
+Ou seja, existem mercados consistentemente baratos ou caros. Pelo nível de preço médio dos anos:
 
-> *Parcial.* Em 2026, o SUP_04 e o SUP_01 empataram como mercados de menor preço, com 7 produtos cada, mas em itens diferentes:
->
-> - **SUP_04:** arroz, café, pão, farinha e frango sobrecoxa;
-> - **SUP_01:** feijão, açúcar, carne (acém), ovo e macarrão;
-> - **os dois:** manteiga e óleo baratos.
->
-> Ou seja, não existe um único "melhor mercado": o melhor depende do produto. *Completar com o ranking entre anos e com os intervalos de confiança.*
+- **mais baratos:** SUP_06, SUP_04, SUP_46, SUP_47 e SUP_01, entre 11% e 13% abaixo da mediana;
+- **mais caros:** SUP_34, SUP_07, SUP_27, SUP_15 e SUP_32, entre 7% e 13% acima da mediana.
+
+O ranking feito com as funções de agrupamento chega a um resultado parecido para os baratos, mas não para os caros: o SUP_33 aparecia como um dos mais caros e, pelo nível de preço, não está entre os 5 mais caros. Isso acontece porque essas funções contam quantas linhas de cada mercado caem em cada grupo, e não quanto o mercado cobra a mais ou a menos.
+
+**Por produto:** em 2026, o SUP_04 e o SUP_01 empataram como mercados de menor preço, com 7 produtos cada, mas em itens diferentes:
+
+- **SUP_04:** arroz, café, pão, farinha e frango sobrecoxa;
+- **SUP_01:** feijão, açúcar, carne (acém), ovo e macarrão;
+- **os dois:** manteiga e óleo baratos.
+
+Ou seja, não existe um único "melhor mercado": o melhor depende do produto.
 
 ### Discussão
 

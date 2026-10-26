@@ -74,8 +74,8 @@ jupyter notebook notebooks/cesta_basica.ipynb
 - [x] Exploração do preço do café por marca
 - [x] Unificação dos nomes de produto
 - [x] Remoção de duplicatas e outliers
-- [ ] Pergunta 1: variabilidade e previsão do preço do café
-- [ ] Pergunta 2: ranking de mercados por produto
+- [x] Pergunta 1: variabilidade e previsão do preço do café
+- [x] Pergunta 2: ranking de mercados por produto
 
 ## Limitações
 
